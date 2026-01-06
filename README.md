@@ -7,6 +7,9 @@ This repository provides a comprehensive toolkit for generating high-quality see
 ### 🚀 Quick Start
 
 ```bash
+# Quick start demo
+python asana_rl_env/examples/quickstart.py
+
 # Generate basic seed data
 python asana_rl_env/examples/generate_basic_data.py
 
@@ -15,6 +18,9 @@ python asana_rl_env/examples/generate_scenarios.py
 
 # Use custom configuration
 python asana_rl_env/examples/custom_config.py
+
+# Run comprehensive tests
+python asana_rl_env/examples/comprehensive_test.py
 ```
 
 ### 📋 Features
@@ -24,6 +30,7 @@ python asana_rl_env/examples/custom_config.py
 - **Quality Validation**: Built-in validation for data consistency and quality
 - **Multiple Export Formats**: JSON and CSV export capabilities
 - **Data Analysis Tools**: Task distribution, project health, and workload analysis
+- **Circular Dependency Prevention**: Automatic prevention of circular task dependencies
 - **No External Dependencies**: Uses only Python standard library
 
 ### 📖 Documentation
@@ -53,6 +60,10 @@ is_valid, report = validator.validate_all(
     generator.projects, generator.tasks
 )
 validator.print_report(report)
+
+# Get statistics
+stats = generator.get_statistics()
+print(f"Generated {stats['total_tasks']} tasks across {stats['total_projects']} projects")
 ```
 
 ### 🏗️ Project Structure
@@ -64,8 +75,16 @@ asana_rl_env/
 ├── validators/      # Quality validator
 ├── config/          # Configuration options
 ├── utils/           # Export, load, and analysis utilities
-└── examples/        # Example scripts
+└── examples/        # Example scripts (quickstart, scenarios, custom, tests)
 ```
+
+### ✨ Key Features
+
+- **Smart Dependency Management**: Automatically creates realistic task dependencies while preventing circular references
+- **Workload Balancing**: Realistic user workload distribution with capacity tracking
+- **Date Consistency**: Ensures all dates are logically consistent (creation, due dates, completion)
+- **Comprehensive Validation**: 100/100 quality scores on completeness and consistency metrics
+- **Multiple Scenarios**: 5 predefined scenarios + unlimited custom configurations
 
 ### 📄 License
 

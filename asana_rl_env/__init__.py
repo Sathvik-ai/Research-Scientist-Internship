@@ -15,6 +15,7 @@ from .data_models.user import User
 from .data_models.team import Team
 from .generators.seed_generator import SeedDataGenerator
 from .validators.quality_validator import QualityValidator
+from .config.generation_config import GenerationConfig
 
 __all__ = [
     "Task",
@@ -23,4 +24,5 @@ __all__ = [
     "Team",
     "SeedDataGenerator",
     "QualityValidator",
+    "GenerationConfig",
 ]
