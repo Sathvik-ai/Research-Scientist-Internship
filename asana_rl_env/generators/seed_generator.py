@@ -245,11 +245,12 @@ class SeedDataGenerator:
             )
             
             # Add project members
-            num_members = random.randint(2, min(6, len(team_members)))
-            project_members = random.sample(team_members, k=min(num_members, len(team_members)))
-            for member in project_members:
-                project.add_member(member.user_id)
-                member.project_ids.append(project.project_id)
+            if team_members:
+                num_members = random.randint(1, min(6, len(team_members)))
+                project_members = random.sample(team_members, k=min(num_members, len(team_members)))
+                for member in project_members:
+                    project.add_member(member.user_id)
+                    member.project_ids.append(project.project_id)
             
             team.add_project(project.project_id)
             projects.append(project)
@@ -356,18 +357,52 @@ class SeedDataGenerator:
         return tasks
     
     def _add_task_dependencies(self, tasks: List[Task]) -> None:
-        """Add dependencies between tasks."""
+        """Add dependencies between tasks, avoiding circular dependencies."""
+        
+        def would_create_cycle(task_id: str, new_dep_id: str, all_tasks: List[Task]) -> bool:
+            """Check if adding a dependency would create a cycle."""
+            visited = set()
+            
+            def has_path(from_id: str, to_id: str) -> bool:
+                if from_id == to_id:
+                    return True
+                if from_id in visited:
+                    return False
+                visited.add(from_id)
+                
+                from_task = next((t for t in all_tasks if t.task_id == from_id), None)
+                if from_task:
+                    for dep_id in from_task.dependencies:
+                        if has_path(dep_id, to_id):
+                            return True
+                return False
+            
+            # Check if new_dep already has a path to task_id
+            return has_path(new_dep_id, task_id)
+        
         for task in tasks:
             if random.random() < self.config.dependency_probability:
                 # Add 1-3 dependencies from the same project
                 project_tasks = [t for t in tasks if t.project_id == task.project_id and t.task_id != task.task_id]
                 if project_tasks:
-                    num_deps = random.randint(1, min(3, len(project_tasks)))
-                    deps = random.sample(project_tasks, k=num_deps)
-                    task.dependencies = [d.task_id for d in deps]
+                    # Try to add dependencies, checking for cycles
+                    max_deps = min(3, len(project_tasks))
+                    added_deps = 0
+                    
+                    # Shuffle to get random selection
+                    random.shuffle(project_tasks)
+                    
+                    for candidate in project_tasks:
+                        if added_deps >= max_deps:
+                            break
+                        
+                        # Check if adding this dependency would create a cycle
+                        if not would_create_cycle(task.task_id, candidate.task_id, tasks):
+                            task.dependencies.append(candidate.task_id)
+                            added_deps += 1
                     
                     # If task has dependencies and is not completed, it might be blocked
-                    if task.status != TaskStatus.COMPLETED and random.random() < 0.3:
+                    if task.dependencies and task.status != TaskStatus.COMPLETED and random.random() < 0.3:
                         task.status = TaskStatus.BLOCKED
     
     def _add_subtasks(self, tasks: List[Task]) -> None:
